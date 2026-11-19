@@ -73,3 +73,7 @@ Copy `.env.example` to `.env` for local settings. Never commit `.env`.
 
 Architecture decisions live in [docs/adr](docs/adr). Fund names, prices, and data are fictional
 and written for this project.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
