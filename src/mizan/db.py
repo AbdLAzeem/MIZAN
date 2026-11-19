@@ -40,6 +40,7 @@ def migrate(conn: Connection) -> list[str]:
         if path.name in done or (path.name.endswith("_vector.sql") and not vector):
             continue
         with conn.transaction():
-            conn.execute(path.read_text(encoding="utf-8"))            conn.execute("INSERT INTO schema_migrations (name) VALUES (%s)", (path.name,))
+            conn.execute(path.read_text(encoding="utf-8"))
+            conn.execute("INSERT INTO schema_migrations (name) VALUES (%s)", (path.name,))
         applied.append(path.name)
     return applied
