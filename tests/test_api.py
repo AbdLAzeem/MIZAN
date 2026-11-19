@@ -157,4 +157,5 @@ def test_there_is_no_endpoint_that_executes_orders(client: TestClient) -> None:
         "/accounts/{account_id}/drafts",
         "/accounts/{account_id}/drafts/{draft_id}/confirm",
         "/accounts/{account_id}/drafts/{draft_id}/cancel",
+        "/accounts/{account_id}/chat",
     }

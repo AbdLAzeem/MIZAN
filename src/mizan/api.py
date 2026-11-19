@@ -1,15 +1,21 @@
 """FastAPI application for Mizan portfolio management and order drafting."""
 
+import json
 import uuid
 from collections.abc import Generator
 from datetime import datetime
-from typing import Annotated
+from pathlib import Path
+from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import BaseModel, Field
 
 import mizan.db
+from mizan.agent.agent import run_agent
+from mizan.agent.knowledge import load_passages
+from mizan.agent.tools import ToolContext
+from mizan.agent.types import AgentLLM, ChatMessage
 from mizan.db import Connection
 from mizan.engine.gap import current_weights
 from mizan.engine.planner import Mode, Side
@@ -71,6 +77,16 @@ class DraftResponse(BaseModel):
     orders: list[DraftOrderOut]
 
 
+class HistoryItem(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=4000)
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=2000)
+    history: list[HistoryItem] = Field(default_factory=list, max_length=20)
+
+
 class ConfirmDraftRequest(BaseModel):
     token: str
 
@@ -109,8 +125,16 @@ def get_idempotency_key(
     return idempotency_key
 
 
-def create_app(database_url: str) -> FastAPI:
+KNOWLEDGE_DIR = Path(__file__).resolve().parents[2] / "data" / "knowledge"
+
+
+def sse(event: str, data: object) -> str:
+    return "event: " + event + chr(10) + "data: " + json.dumps(data) + chr(10) * 2
+
+
+def create_app(database_url: str, llm: AgentLLM | None = None) -> FastAPI:
     app = FastAPI()
+    knowledge = load_passages(KNOWLEDGE_DIR) if KNOWLEDGE_DIR.exists() else []
 
     def get_db() -> Generator[Connection, None, None]:
         conn = mizan.db.connect(database_url)
@@ -272,5 +296,32 @@ def create_app(database_url: str) -> FastAPI:
     ) -> Response:
         cancel_draft(conn, user_id, account_id, draft_id)
         return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    @app.post("/accounts/{account_id}/chat")
+    def post_chat(
+        account_id: uuid.UUID,
+        body: ChatRequest,
+        user_id: Annotated[uuid.UUID, Depends(get_current_user_id)],
+        conn: Annotated[Connection, Depends(get_db)],
+    ) -> StreamingResponse:
+        if llm is None:
+            raise HTTPException(status_code=503, detail="llm_not_configured")
+        load_portfolio(conn, user_id, account_id)  # ownership check, 404 if not owned
+        ctx = ToolContext(conn, user_id, account_id, kb=knowledge)
+        history = [ChatMessage(h.role, h.content) for h in body.history]
+        result = run_agent(llm, ctx, body.message, history)
+
+        def events() -> Generator[str, None, None]:
+            yield sse("intent", {"intent": result.intent.value})
+            for name, ok in result.tool_calls:
+                yield sse("tool", {"name": name, "ok": ok})
+            for draft in result.ui:
+                yield sse("draft", draft)
+            words = result.reply.split(" ")
+            for i in range(0, len(words), 5):
+                yield sse("message", {"text": " ".join(words[i : i + 5]) + " "})
+            yield sse("done", {"steps": result.steps, "corrected": result.corrected})
+
+        return StreamingResponse(events(), media_type="text/event-stream")
 
     return app

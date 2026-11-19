@@ -22,11 +22,13 @@ portfolio, computes the gap to a target allocation, and prepares **draft** buy a
 
 ## Status
 
-Phases 0 to 2 are done: foundation and CI, the deterministic engine
-([ADR 0006](docs/adr/0006-allocation-rules-and-order-planning.md)), and the backend with
-drafts, confirmation, an outbox worker with retries and a double-entry ledger, reconciliation,
-and a FastAPI app ([ADR 0007](docs/adr/0007-confirmation-outbox-worker-protocol.md)).
-The agent and evals follow in later phases.
+Phases 0 to 3 are done except the live model provider and vector search: foundation and CI,
+the deterministic engine ([ADR 0006](docs/adr/0006-allocation-rules-and-order-planning.md)), the
+backend with confirmation, outbox worker, ledger, and reconciliation
+([ADR 0007](docs/adr/0007-confirmation-outbox-worker-protocol.md)), and the agent with six tools,
+a numeric faithfulness guard, a router, and an SSE chat endpoint
+([ADR 0008](docs/adr/0008-agent-design-tools-guardrails-routing.md)). Agent tests use scripted
+models. Evals and operations follow in later phases.
 
 | Phase | Scope |
 |---|---|
