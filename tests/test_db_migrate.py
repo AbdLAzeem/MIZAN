@@ -24,4 +24,7 @@ def test_negative_cash_is_rejected(conn: Connection) -> None:
     user = conn.execute("INSERT INTO users (name) VALUES ('x') RETURNING id").fetchone()
     assert user is not None
     with pytest.raises(psycopg.errors.CheckViolation):
-        conn.execute("INSERT INTO accounts (user_id, cash_balance) VALUES (%s, -1)", (user["id"],))
+        conn.execute(
+            "INSERT INTO accounts (user_id, cash_balance, opening_cash) VALUES (%s, -1, 0)",
+            (user["id"],),
+        )

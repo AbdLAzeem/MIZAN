@@ -74,14 +74,15 @@ def make_account(conn: Connection) -> Callable[..., Account]:
         user = conn.execute("INSERT INTO users (name) VALUES ('tester') RETURNING id").fetchone()
         assert user is not None
         acc = conn.execute(
-            "INSERT INTO accounts (user_id, cash_balance) VALUES (%s, %s) RETURNING id",
-            (user["id"], Decimal(cash)),
+            "INSERT INTO accounts (user_id, cash_balance, opening_cash) VALUES (%s, %s, %s) "
+            "RETURNING id",
+            (user["id"], Decimal(cash), Decimal(cash)),
         ).fetchone()
         assert acc is not None
         for symbol, units in (holdings or {}).items():
             conn.execute(
-                "INSERT INTO holdings (account_id, symbol, units) VALUES (%s, %s, %s)",
-                (acc["id"], symbol, units),
+                "INSERT INTO holdings (account_id, symbol, units, opening_units) VALUES (%s, %s, %s, %s)",
+                (acc["id"], symbol, units, units),
             )
         goal, risk, years = profile
         weights = {k.value: str(v) for k, v in target_allocation(Goal(goal), risk, years).items()}

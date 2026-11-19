@@ -11,7 +11,8 @@ CREATE TABLE accounts (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES users (id),
     currency text NOT NULL DEFAULT 'USD',
-    cash_balance numeric(18, 2) NOT NULL CHECK (cash_balance >= 0)
+    cash_balance numeric(18, 2) NOT NULL CHECK (cash_balance >= 0),
+    opening_cash numeric(18, 2) NOT NULL CHECK (opening_cash >= 0)
 );
 
 CREATE TABLE instruments (
@@ -25,6 +26,7 @@ CREATE TABLE holdings (
     account_id uuid NOT NULL REFERENCES accounts (id),
     symbol text NOT NULL REFERENCES instruments (symbol),
     units integer NOT NULL CHECK (units >= 0),
+    opening_units integer NOT NULL DEFAULT 0 CHECK (opening_units >= 0),
     PRIMARY KEY (account_id, symbol)
 );
 
