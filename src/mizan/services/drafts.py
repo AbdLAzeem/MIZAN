@@ -351,9 +351,9 @@ def confirm_draft(
             "account_id": str(account_id),
         }
         conn.execute(
-            "INSERT INTO outbox_events (event_type, payload, status, created_at) "
-            "VALUES (%s, %s, 'pending', %s)",
-            ("order.confirmed", Jsonb(outbox_payload), effective_now),
+            "INSERT INTO outbox_events (event_type, payload, status, created_at, next_attempt_at) "
+            "VALUES (%s, %s, 'pending', %s, %s)",
+            ("order.confirmed", Jsonb(outbox_payload), effective_now, effective_now),
         )
 
         conn.execute(
