@@ -1,4 +1,4 @@
-# Python
+﻿# Python
 __pycache__/
 *.py[cod]
 .venv/
@@ -22,8 +22,3 @@ htmlcov/
 .vscode/
 .DS_Store
 Thumbs.db
-
-# Private working files (owner's planning notes and delegation specs, not part of the public repo)
-PLAN-ar.md
-GLOSSARY-ar.md
-tasks/

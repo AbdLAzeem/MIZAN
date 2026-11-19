@@ -9,7 +9,15 @@ TEXT_SUFFIXES = {".py", ".md", ".toml", ".json", ".yml", ".yaml", ".txt", ".exam
 # Built from code points so this file does not contain the banned characters or words itself.
 EM_DASH = chr(0x2014)
 EN_DASH = chr(0x2013)
-BANNED_WORDS = ["Thn" + "dr", "Co-Authored" + "-By", "Cla" + "ude"]
+BANNED_WORDS = [
+    "Thn" + "dr",
+    "Co-Authored" + "-By",
+    "Cla" + "ude",
+    "Anthr" + "opic",
+    "Antigrav" + "ity",
+    "Generated " + "with",
+    "AI-gener" + "ated",
+]
 
 
 def tracked_text_files() -> list[Path]:
@@ -36,3 +44,11 @@ def test_no_banned_words_in_tracked_files() -> None:
         if w in p.read_text(encoding="utf-8")
     ]
     assert not bad, f"banned words found: {bad}"
+
+
+def test_no_banned_words_in_commit_messages() -> None:
+    log = subprocess.run(
+        ["git", "log", "--format=%an %ae%n%B"], cwd=ROOT, capture_output=True, text=True, check=True
+    ).stdout
+    bad = [w for w in BANNED_WORDS if w.lower() in log.lower()]
+    assert not bad, f"banned words found in commit history: {bad}"
