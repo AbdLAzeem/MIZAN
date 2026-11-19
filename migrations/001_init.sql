@@ -1,6 +1,5 @@
 -- Mizan schema, version 1. Applied in order by mizan.db.migrate.
 
-CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE users (
