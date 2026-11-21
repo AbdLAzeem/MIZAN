@@ -22,7 +22,9 @@ portfolio, computes the gap to a target allocation, and prepares **draft** buy a
 
 ## Status
 
-Phase 0 (foundation and CI) is in progress. The deterministic engine, backend, agent, and evals
+Phases 0 and 1 are done: foundation, CI, and the deterministic engine (target allocation, gap,
+drift, and order planning, see [ADR 0006](docs/adr/0006-allocation-rules-and-order-planning.md)).
+The backend, agent, and evals
 follow in later phases.
 
 | Phase | Scope |
