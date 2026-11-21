@@ -37,6 +37,8 @@ class AgentTurn:
 
     text: str | None = None
     tool_calls: tuple[ToolCall, ...] = ()
+    input_tokens: int = 0
+    output_tokens: int = 0
 
 
 class AgentLLM(Protocol):

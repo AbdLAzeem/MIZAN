@@ -77,6 +77,36 @@ _EDUCATION_SUBSTRINGS: tuple[str, ...] = (
     "سندات",
 )
 
+# A concept question ("what is portfolio drift?") is education even when it contains portfolio
+# words, unless it is about the user's own account. Found by the evals (education-004, -006).
+_QUESTION_STARTS: tuple[str, ...] = (
+    "what is",
+    "what are",
+    "explain",
+    "how does",
+    "how do",
+    "why",
+    "ما هو",
+    "ما هي",
+    "اشرح",
+    "لماذا",
+)
+
+_PERSONAL_MARKERS: tuple[str, ...] = (
+    " my ",
+    " me ",
+    "mine",
+    "حسابي",
+    "محفظتي",
+    "رصيد",
+    "فجوة",
+)
+
+
+def _is_concept_question(lowered: str) -> bool:
+    padded = f" {lowered} "
+    return lowered.startswith(_QUESTION_STARTS) and not any(m in padded for m in _PERSONAL_MARKERS)
+
 
 def classify(message: str) -> Intent:
     lowered = message.lower()
@@ -88,6 +118,9 @@ def classify(message: str) -> Intent:
     for pattern in _ORDERS_SUBSTRINGS:
         if pattern in lowered:
             return Intent.ORDERS
+
+    if _is_concept_question(lowered):
+        return Intent.EDUCATION
 
     for pattern in _PORTFOLIO_SUBSTRINGS:
         if pattern in lowered:
