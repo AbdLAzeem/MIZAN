@@ -53,3 +53,6 @@ python_version = "3.12"
 strict = true
 mypy_path = "src"
 packages = ["mizan"]
+
+[tool.ruff.format]
+line-ending = "lf"

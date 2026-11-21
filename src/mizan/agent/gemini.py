@@ -112,4 +112,10 @@ class GeminiLLM:
             for i, p in enumerate(parts)
             if p.function_call is not None
         )
-        return AgentTurn(text=text or None, tool_calls=calls)
+        usage = getattr(resp, "usage_metadata", None)
+        return AgentTurn(
+            text=text or None,
+            tool_calls=calls,
+            input_tokens=int(getattr(usage, "prompt_token_count", 0) or 0),
+            output_tokens=int(getattr(usage, "candidates_token_count", 0) or 0),
+        )

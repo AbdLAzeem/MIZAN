@@ -1,6 +1,7 @@
 """The agent run loop as a LangGraph graph: route, model, tools, guard (ADR 0008)."""
 
-from collections.abc import Sequence
+import time
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any, TypedDict
 
@@ -13,10 +14,12 @@ from mizan.agent.guardrails import (
     with_disclaimer,
 )
 from mizan.agent.router import Intent, classify
-from mizan.agent.tools import ToolContext, execute_tool, tool_specs
+from mizan.agent.tools import ToolContext, ToolOutcome, execute_tool, tool_specs
 from mizan.agent.types import AgentLLM, ChatMessage, ToolCall
 
 MAX_STEPS = 6
+
+ToolObserver = Callable[[ToolCall, ToolOutcome, int], None]
 
 FALLBACK_INCOMPLETE = (
     "I could not finish this request. Please rephrase it or try again in a moment."
@@ -59,7 +62,12 @@ class AgentResult:
     messages: tuple[ChatMessage, ...]
 
 
-def build_graph(llm: AgentLLM, ctx: ToolContext, max_steps: int = MAX_STEPS) -> Any:
+def build_graph(
+    llm: AgentLLM,
+    ctx: ToolContext,
+    max_steps: int = MAX_STEPS,
+    on_tool: ToolObserver | None = None,
+) -> Any:
     specs = tool_specs()
 
     def route(state: AgentState) -> dict[str, Any]:
@@ -87,7 +95,10 @@ def build_graph(llm: AgentLLM, ctx: ToolContext, max_steps: int = MAX_STEPS) -> 
         outputs = list(state["tool_outputs"])
         log = list(state["tool_log"])
         for call in state["pending"]:
+            started = time.perf_counter()
             outcome = execute_tool(ctx, call)
+            if on_tool is not None:
+                on_tool(call, outcome, round((time.perf_counter() - started) * 1000))
             messages.append(ChatMessage("tool", outcome.content, tool_call_id=call.id))
             outputs.append(outcome.content)
             log.append((call.name, outcome.ok))
@@ -153,9 +164,10 @@ def run_agent(
     user_message: str,
     history: Sequence[ChatMessage] = (),
     max_steps: int = MAX_STEPS,
+    on_tool: ToolObserver | None = None,
 ) -> AgentResult:
     """Run one user message through the agent and return the reply and out of band UI data."""
-    graph = build_graph(llm, ctx, max_steps)
+    graph = build_graph(llm, ctx, max_steps, on_tool)
     initial: AgentState = {
         "messages": [
             ChatMessage("system", SYSTEM_PROMPT),
