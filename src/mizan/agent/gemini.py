@@ -6,7 +6,8 @@ The client is injected so tests can use a fake. The API key is read from the env
 
 import json
 import os
-from collections.abc import Sequence
+import time
+from collections.abc import Callable, Sequence
 from typing import Any
 
 from google import genai
@@ -15,6 +16,8 @@ from google.genai import types
 from mizan.agent.types import AgentTurn, ChatMessage, ToolCall, ToolSpec
 
 DEFAULT_MODEL = "gemini-3.1-flash-lite"
+RETRYABLE_STATUS = frozenset({429, 500, 502, 503, 504})
+RETRY_DELAYS_SECONDS = (2.0, 6.0, 15.0)
 
 
 def _tool_name_by_id(messages: Sequence[ChatMessage]) -> dict[str, str]:
@@ -75,7 +78,14 @@ def to_tools(specs: Sequence[ToolSpec]) -> list[Any]:
 class GeminiLLM:
     """An `AgentLLM` backed by the Gemini API."""
 
-    def __init__(self, client: Any, model: str = DEFAULT_MODEL, temperature: float = 0.2) -> None:
+    def __init__(
+        self,
+        client: Any,
+        model: str = DEFAULT_MODEL,
+        temperature: float = 0.2,
+        sleep: Callable[[float], None] = time.sleep,
+    ) -> None:
+        self._sleep = sleep
         self._client = client
         self._model = model
         self._temperature = temperature
@@ -88,6 +98,19 @@ class GeminiLLM:
         model = os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
         return cls(genai.Client(api_key=key), model)
 
+    def _generate_with_retry(self, contents: Any, config: Any) -> Any:
+        """Call the API, retrying transient errors (quota, overload) with growing delays."""
+        for delay in (*RETRY_DELAYS_SECONDS, None):
+            try:
+                return self._client.models.generate_content(
+                    model=self._model, contents=contents, config=config
+                )
+            except Exception as exc:
+                status = getattr(exc, "code", None)
+                if delay is None or status not in RETRYABLE_STATUS:
+                    raise
+                self._sleep(delay)
+
     def turn(self, messages: Sequence[ChatMessage], tools: Sequence[ToolSpec]) -> AgentTurn:
         system, contents = to_contents(messages)
         config = types.GenerateContentConfig(
@@ -96,9 +119,7 @@ class GeminiLLM:
             temperature=self._temperature,
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
-        resp = self._client.models.generate_content(
-            model=self._model, contents=contents, config=config
-        )
+        resp = self._generate_with_retry(contents, config)
         candidates = resp.candidates or []
         parts = (candidates[0].content.parts or []) if candidates and candidates[0].content else []
         text = "".join(p.text for p in parts if getattr(p, "text", None) and not p.thought)

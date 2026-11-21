@@ -77,6 +77,40 @@ def test_turn_parses_text_and_function_calls() -> None:
     assert cfg.automatic_function_calling is not None and cfg.automatic_function_calling.disable
 
 
+class FlakyModels:
+    def __init__(self, failures: list[int]) -> None:
+        self.failures = failures
+        self.calls = 0
+
+    def generate_content(self, **kwargs: Any) -> Any:
+        self.calls += 1
+        if self.failures:
+            err = Exception("provider error")
+            err.code = self.failures.pop(0)  # type: ignore[attr-defined]
+            raise err
+        content = SimpleNamespace(parts=[part(text="ok")])
+        return SimpleNamespace(candidates=[SimpleNamespace(content=content)])
+
+
+def test_transient_errors_are_retried_with_growing_delays() -> None:
+    models = FlakyModels([503, 429])
+    delays: list[float] = []
+    llm = GeminiLLM(SimpleNamespace(models=models), sleep=delays.append)
+    assert llm.turn([ChatMessage("user", "hi")], []).text == "ok"
+    assert models.calls == 3 and delays == [2.0, 6.0]
+
+
+def test_permanent_errors_and_exhausted_retries_are_raised() -> None:
+    bad = FlakyModels([400])
+    with pytest.raises(Exception, match="provider error"):
+        GeminiLLM(SimpleNamespace(models=bad), sleep=lambda _s: None).turn([], [])
+    assert bad.calls == 1
+    down = FlakyModels([503, 503, 503, 503, 503])
+    with pytest.raises(Exception, match="provider error"):
+        GeminiLLM(SimpleNamespace(models=down), sleep=lambda _s: None).turn([], [])
+    assert down.calls == 4
+
+
 def test_from_env_requires_a_key(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     with pytest.raises(RuntimeError):
