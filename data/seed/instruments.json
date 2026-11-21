@@ -1,0 +1,5 @@
+[
+  {"symbol": "NGEF", "name": "Nile Growth Equity Fund", "asset_class": "equity", "price": "125.40"},
+  {"symbol": "DIBF", "name": "Delta Income Bond Fund", "asset_class": "fixed_income", "price": "98.75"},
+  {"symbol": "SGLD", "name": "Sahara Gold Fund", "asset_class": "gold", "price": "210.10"}
+]
