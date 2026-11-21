@@ -43,7 +43,7 @@ availability, so phase 5 starts there.
 
 ## Limits of this report
 
-- 37 scenarios written by the project owner's team, not by independent users.
+- 37 scenarios written by the author (some drafted by a delegated coding model and reviewed), not by independent users.
 - One small model, free tier, a single day.
 - No LLM judge of explanation quality yet. It needs 50 human labels and an agreement score
   (Cohen's kappa), which is the next step of this phase.
