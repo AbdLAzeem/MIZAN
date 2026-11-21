@@ -10,6 +10,8 @@ class ToolCall:
     id: str
     name: str
     arguments: dict[str, Any]
+    # Opaque provider data that must be sent back unchanged (Gemini thought signature).
+    provider_data: bytes | None = field(default=None, compare=False)
 
 
 @dataclass(frozen=True)
