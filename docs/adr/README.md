@@ -13,3 +13,4 @@ Number them in order and do not rewrite history. Supersede an ADR with a new one
 | [0006](0006-allocation-rules-and-order-planning.md) | Allocation rules and order planning |
 | [0007](0007-confirmation-outbox-worker-protocol.md) | Confirmation, outbox, and worker protocol |
 | [0008](0008-agent-design-tools-guardrails-routing.md) | Agent design: tools, guardrails, and routing |
+| [0009](0009-evals-check-state-and-measure-noise.md) | Evals check resulting state and measure noise |

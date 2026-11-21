@@ -22,13 +22,14 @@ portfolio, computes the gap to a target allocation, and prepares **draft** buy a
 
 ## Status
 
-Phases 0 to 3 are done except the live model provider and vector search: foundation and CI,
-the deterministic engine ([ADR 0006](docs/adr/0006-allocation-rules-and-order-planning.md)), the
-backend with confirmation, outbox worker, ledger, and reconciliation
-([ADR 0007](docs/adr/0007-confirmation-outbox-worker-protocol.md)), and the agent with six tools,
-a numeric faithfulness guard, a router, and an SSE chat endpoint
-([ADR 0008](docs/adr/0008-agent-design-tools-guardrails-routing.md)). Agent tests use scripted
-models. Evals and operations follow in later phases.
+Phases 0 to 3 are done, and phase 4 is mostly done: run tracing, a golden set of 37 scenarios
+that checks resulting state, a noise floor measurement, and a CI gate that runs the suite with a
+scripted model ([ADR 0009](docs/adr/0009-evals-check-state-and-measure-noise.md)). The first live
+results and their failure analysis are in [docs/evals/report-1.md](docs/evals/report-1.md). The
+LLM judge with human labels, then operations and cost, come next.
+
+Run the evals: `python -m mizan.evals --mode fake` (free, deterministic) or
+`python -m mizan.evals --mode live --repeats 2` (uses the Gemini API key from `.env`).
 
 | Phase | Scope |
 |---|---|
