@@ -43,4 +43,4 @@ jobs:
       - name: Type check
         run: python -m mypy
       - name: Test
-        run: python -m pytest
+        run: python -m pytest --cov=mizan --cov-fail-under=90

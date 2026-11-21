@@ -22,8 +22,13 @@ portfolio, computes the gap to a target allocation, and prepares **draft** buy a
 
 ## Status
 
-Phase 0 (foundation and CI) is in progress. The deterministic engine, backend, agent, and evals
-follow in later phases.
+Phases 0 to 3 are done except the live model provider and vector search: foundation and CI,
+the deterministic engine ([ADR 0006](docs/adr/0006-allocation-rules-and-order-planning.md)), the
+backend with confirmation, outbox worker, ledger, and reconciliation
+([ADR 0007](docs/adr/0007-confirmation-outbox-worker-protocol.md)), and the agent with six tools,
+a numeric faithfulness guard, a router, and an SSE chat endpoint
+([ADR 0008](docs/adr/0008-agent-design-tools-guardrails-routing.md)). Agent tests use scripted
+models. Evals and operations follow in later phases.
 
 | Phase | Scope |
 |---|---|
@@ -65,6 +70,7 @@ python -m venv .venv
 .venv\Scripts\python -m pytest
 ```
 
+Set `DATABASE_URL` to run the database tests (they are skipped without it).
 Tests never call a real LLM provider. They use `FakeLLM`. Database tests run when `DATABASE_URL`
 points at PostgreSQL with the pgvector extension, which CI provides as a service container.
 Copy `.env.example` to `.env` for local settings. Never commit `.env`.
