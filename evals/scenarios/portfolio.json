@@ -1,0 +1,107 @@
+[
+  {
+    "id": "portfolio-001",
+    "category": "portfolio",
+    "description": "User checks portfolio holdings and total balance with setup A.",
+    "setup": {"cash": "1000", "holdings": {"NGEF": 10, "DIBF": 5, "SGLD": 1}},
+    "turns": [
+      {
+        "user": "What is my current portfolio balance and holdings?",
+        "script": [
+          {"tool_calls": [{"name": "get_portfolio"}]},
+          {"text": "Your total value is 2957.85 with cash balance of 1000.00 and holdings value of 1957.85 across 3 positions."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["get_portfolio"],
+      "drafts": 0,
+      "intent": "portfolio",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "portfolio-002",
+    "category": "portfolio",
+    "description": "User checks target allocation profile for setup A.",
+    "setup": {"cash": "1000", "holdings": {"NGEF": 10, "DIBF": 5, "SGLD": 1}},
+    "turns": [
+      {
+        "user": "What is my target allocation?",
+        "script": [
+          {"tool_calls": [{"name": "get_target_allocation"}]},
+          {"text": "Your target allocation is equity 36.00, fixed income 54.00, and gold 10.00 with horizon 5 years and risk 3."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["get_target_allocation"],
+      "drafts": 0,
+      "intent": "portfolio",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "portfolio-003",
+    "category": "portfolio",
+    "description": "User checks gap and drift alerts on setup A.",
+    "setup": {"cash": "1000", "holdings": {"NGEF": 10, "DIBF": 5, "SGLD": 1}},
+    "turns": [
+      {
+        "user": "Check my portfolio drift and allocation gap",
+        "script": [
+          {"tool_calls": [{"name": "compute_gap"}]},
+          {"text": "Your allocation drift shows equity gap of 28.05 and fixed income gap of -28.78 with gold at 0.73."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["compute_gap"],
+      "drafts": 0,
+      "intent": "portfolio",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "portfolio-004",
+    "category": "portfolio",
+    "description": "User checks an empty account balance with setup B.",
+    "setup": {"cash": "0", "holdings": {}},
+    "turns": [
+      {
+        "user": "What is my account balance and portfolio?",
+        "script": [
+          {"tool_calls": [{"name": "get_portfolio"}]},
+          {"text": "Your cash balance is 0.00, total value is 0.00, and you hold 0 positions."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["get_portfolio"],
+      "drafts": 0,
+      "intent": "portfolio",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "portfolio-005",
+    "category": "portfolio",
+    "description": "User checks portfolio and target allocation together on growth profile setup C.",
+    "setup": {"cash": "5000", "holdings": {}, "profile": ["growth", 5, 10]},
+    "turns": [
+      {
+        "user": "Show my portfolio balance and target allocation",
+        "script": [
+          {"tool_calls": [{"name": "get_portfolio"}, {"name": "get_target_allocation"}]},
+          {"text": "Your total value is 5000.00 all in cash 5000.00. Your target allocation is equity 67.00, fixed income 28.00, and gold 5.00."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["get_portfolio", "get_target_allocation"],
+      "drafts": 0,
+      "intent": "portfolio",
+      "outcome": "ok"
+    }
+  }
+]

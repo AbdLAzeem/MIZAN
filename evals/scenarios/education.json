@@ -1,0 +1,112 @@
+[
+  {
+    "id": "education-002",
+    "category": "education",
+    "description": "User asks what equity is and the model explains using search_knowledge.",
+    "setup": {"cash": "0", "holdings": {}},
+    "turns": [
+      {
+        "user": "What is equity?",
+        "script": [
+          {"tool_calls": [{"name": "search_knowledge", "arguments": {"query": "equity"}}]},
+          {"text": "Equity represents shares of ownership in a company or fund."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["search_knowledge"],
+      "reply_contains": ["ownership"],
+      "drafts": 0,
+      "intent": "education",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "education-003",
+    "category": "education",
+    "description": "User asks about fixed income instruments.",
+    "setup": {"cash": "0", "holdings": {}},
+    "turns": [
+      {
+        "user": "Explain fixed income and bonds",
+        "script": [
+          {"tool_calls": [{"name": "search_knowledge", "arguments": {"query": "fixed income bonds"}}]},
+          {"text": "Fixed income assets like bonds pay regular income and typically carry lower risk than equities."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["search_knowledge"],
+      "reply_contains": ["income"],
+      "drafts": 0,
+      "intent": "education",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "education-004",
+    "category": "education",
+    "description": "User asks why people invest in gold.",
+    "setup": {"cash": "0", "holdings": {}},
+    "turns": [
+      {
+        "user": "Why do people hold gold in a portfolio?",
+        "script": [
+          {"tool_calls": [{"name": "search_knowledge", "arguments": {"query": "gold portfolio store value"}}]},
+          {"text": "Gold is often held as a store of value and a hedge to diversify a portfolio."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["search_knowledge"],
+      "reply_contains": ["store of value"],
+      "drafts": 0,
+      "intent": "education",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "education-005",
+    "category": "education",
+    "description": "User asks how investment horizon and risk are related.",
+    "setup": {"cash": "0", "holdings": {}},
+    "turns": [
+      {
+        "user": "Explain how investment horizon affects risk",
+        "script": [
+          {"tool_calls": [{"name": "search_knowledge", "arguments": {"query": "horizon risk"}}]},
+          {"text": "A longer investment horizon allows an investor to accept more risk because there is more time to recover from downturns."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["search_knowledge"],
+      "reply_contains": ["horizon"],
+      "drafts": 0,
+      "intent": "education",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "education-006",
+    "category": "education",
+    "description": "User asks what portfolio drift is without triggering orders.",
+    "setup": {"cash": "0", "holdings": {}},
+    "turns": [
+      {
+        "user": "What is portfolio drift?",
+        "script": [
+          {"tool_calls": [{"name": "search_knowledge", "arguments": {"query": "portfolio drift"}}]},
+          {"text": "Portfolio drift happens when market movements shift asset weights away from their original target allocation."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["search_knowledge"],
+      "reply_contains": ["drift"],
+      "drafts": 0,
+      "intent": "education",
+      "outcome": "ok"
+    }
+  }
+]

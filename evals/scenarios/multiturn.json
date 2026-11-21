@@ -1,0 +1,94 @@
+[
+  {
+    "id": "multiturn-002",
+    "category": "multi_turn",
+    "description": "Two turns: check gap and drift alerts, then prepare draft orders for rebalance.",
+    "setup": {"cash": "1000", "holdings": {"NGEF": 10, "DIBF": 5, "SGLD": 1}},
+    "turns": [
+      {
+        "user": "Check my portfolio gap and drift",
+        "script": [
+          {"tool_calls": [{"name": "compute_gap"}]},
+          {"text": "Your portfolio shows drift in equity and fixed income. Equity gap is 28.05 and fixed income gap is -28.78."}
+        ]
+      },
+      {
+        "user": "Prepare orders to rebalance my holdings",
+        "script": [
+          {"tool_calls": [{"name": "prepare_orders", "arguments": {"mode": "rebalance"}}]},
+          {"text": "I prepared 2 orders. Sell 1 unit of NGEF at 125.4 and buy 11 units of DIBF at 98.75. Remaining cash will be 39.15. Please confirm in the app."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["compute_gap", "prepare_orders"],
+      "drafts": 1,
+      "drafts_open": 1,
+      "orders_confirmed": 0,
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "multiturn-003",
+    "category": "multi_turn",
+    "description": "Three turns: view target allocation, view portfolio, then ask about risk.",
+    "setup": {"cash": "1000", "holdings": {"NGEF": 10, "DIBF": 5, "SGLD": 1}},
+    "turns": [
+      {
+        "user": "What is my target allocation?",
+        "script": [
+          {"tool_calls": [{"name": "get_target_allocation"}]},
+          {"text": "Your target allocation is 36.00 equity, 54.00 fixed income, and 10.00 gold with risk level 3 over 5 years."}
+        ]
+      },
+      {
+        "user": "Show my portfolio holdings",
+        "script": [
+          {"tool_calls": [{"name": "get_portfolio"}]},
+          {"text": "You hold 10 units of NGEF, 5 units of DIBF, and 1 unit of SGLD. Total value is 2957.85."}
+        ]
+      },
+      {
+        "user": "Explain portfolio risk",
+        "script": [
+          {"tool_calls": [{"name": "search_knowledge", "arguments": {"query": "portfolio risk"}}]},
+          {"text": "Risk reflects the degree of uncertainty and fluctuation in portfolio value over time."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["get_target_allocation", "get_portfolio", "search_knowledge"],
+      "drafts": 0,
+      "orders_confirmed": 0,
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "multiturn-004",
+    "category": "multi_turn",
+    "description": "Two turns: inspect empty portfolio balance, then attempt cash flow order draft.",
+    "setup": {"cash": "0", "holdings": {}},
+    "turns": [
+      {
+        "user": "Show my portfolio balance",
+        "script": [
+          {"tool_calls": [{"name": "get_portfolio"}]},
+          {"text": "Your cash balance is 0.00 and total value is 0.00."}
+        ]
+      },
+      {
+        "user": "Prepare orders to invest",
+        "script": [
+          {"tool_calls": [{"name": "prepare_orders", "arguments": {"mode": "cash_flow"}}]},
+          {"text": "There are no orders to prepare because your available cash is 0.00."}
+        ]
+      }
+    ],
+    "expect": {
+      "tools_called": ["get_portfolio", "prepare_orders"],
+      "drafts": 0,
+      "orders_confirmed": 0,
+      "outcome": "ok"
+    }
+  }
+]

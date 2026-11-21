@@ -1,0 +1,269 @@
+[
+  {
+    "id": "orders-002",
+    "category": "orders",
+    "description": "Prepare a cash flow draft without confirmation on setup A.",
+    "setup": {
+      "cash": "1000",
+      "holdings": {
+        "NGEF": 10,
+        "DIBF": 5,
+        "SGLD": 1
+      }
+    },
+    "turns": [
+      {
+        "user": "Prepare orders using my available cash",
+        "script": [
+          {
+            "tool_calls": [
+              {
+                "name": "prepare_orders",
+                "arguments": {
+                  "mode": "cash_flow"
+                }
+              }
+            ]
+          },
+          {
+            "text": "Draft prepared: buy 10 units of DIBF at 98.75 for total 987.50 with cash after 12.50. Please review and confirm in the app."
+          }
+        ]
+      }
+    ],
+    "expect": {
+      "orders_confirmed": 0,
+      "orders_executed": 0,
+      "drafts": 1,
+      "drafts_open": 1,
+      "tools_called": [
+        "prepare_orders"
+      ],
+      "intent": "orders",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "orders-003",
+    "category": "orders",
+    "description": "Prepare full rebalancing draft on setup A.",
+    "setup": {
+      "cash": "1000",
+      "holdings": {
+        "NGEF": 10,
+        "DIBF": 5,
+        "SGLD": 1
+      }
+    },
+    "turns": [
+      {
+        "user": "Prepare orders to rebalance my entire portfolio",
+        "script": [
+          {
+            "tool_calls": [
+              {
+                "name": "prepare_orders",
+                "arguments": {
+                  "mode": "rebalance"
+                }
+              }
+            ]
+          },
+          {
+            "text": "Draft ready: sell 1 units of NGEF at 125.4 and buy 11 units of DIBF at 98.75 for 1086.25, leaving cash after 39.15. Confirm in the app to proceed."
+          }
+        ]
+      }
+    ],
+    "expect": {
+      "orders_confirmed": 0,
+      "orders_executed": 0,
+      "drafts": 1,
+      "drafts_open": 1,
+      "tools_called": [
+        "prepare_orders"
+      ],
+      "intent": "orders",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "orders-004",
+    "category": "orders",
+    "description": "Prepare rebalance draft and confirm it through worker execution on setup A.",
+    "setup": {
+      "cash": "1000",
+      "holdings": {
+        "NGEF": 10,
+        "DIBF": 5,
+        "SGLD": 1
+      }
+    },
+    "turns": [
+      {
+        "user": "Draft a rebalance order for my portfolio",
+        "script": [
+          {
+            "tool_calls": [
+              {
+                "name": "prepare_orders",
+                "arguments": {
+                  "mode": "rebalance"
+                }
+              }
+            ]
+          },
+          {
+            "text": "Draft prepared: sell 1 units of NGEF at 125.4 and buy 11 units of DIBF at 98.75 for 1086.25. Please confirm in the app."
+          }
+        ]
+      }
+    ],
+    "after": {
+      "confirm_last_draft": true,
+      "run_worker": true
+    },
+    "expect": {
+      "orders_executed": 1,
+      "orders_confirmed": 1,
+      "drafts": 1,
+      "tools_called": [
+        "prepare_orders"
+      ],
+      "intent": "orders",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "orders-005",
+    "category": "orders",
+    "description": "Attempt to prepare orders on an empty account (setup B) resulting in nothing to do.",
+    "setup": {
+      "cash": "0",
+      "holdings": {}
+    },
+    "turns": [
+      {
+        "user": "Prepare orders to buy according to my plan",
+        "script": [
+          {
+            "tool_calls": [
+              {
+                "name": "prepare_orders",
+                "arguments": {
+                  "mode": "cash_flow"
+                }
+              }
+            ]
+          },
+          {
+            "text": "There are no orders to prepare because your cash balance is 0."
+          }
+        ]
+      }
+    ],
+    "expect": {
+      "drafts": 0,
+      "orders_confirmed": 0,
+      "orders_executed": 0,
+      "tools_called": [
+        "prepare_orders"
+      ],
+      "intent": "orders",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "orders-006",
+    "category": "orders",
+    "description": "Prepare cash flow draft on setup C with user confirming and worker executing.",
+    "setup": {
+      "cash": "5000",
+      "holdings": {},
+      "profile": [
+        "growth",
+        5,
+        10
+      ]
+    },
+    "turns": [
+      {
+        "user": "Prepare orders to invest my deposited cash",
+        "script": [
+          {
+            "tool_calls": [
+              {
+                "name": "prepare_orders",
+                "arguments": {
+                  "mode": "cash_flow"
+                }
+              }
+            ]
+          },
+          {
+            "text": "Draft ready: buy 14 units of DIBF at 98.75 for 1382.50, buy 26 units of NGEF at 125.4 for 3260.40, and buy 1 units of SGLD at 210.1 for 210.10, with cash after 147.00. Please confirm in the app."
+          }
+        ]
+      }
+    ],
+    "after": {
+      "confirm_last_draft": true,
+      "run_worker": true
+    },
+    "expect": {
+      "orders_executed": 1,
+      "orders_confirmed": 1,
+      "drafts": 1,
+      "tools_called": [
+        "prepare_orders"
+      ],
+      "intent": "orders",
+      "outcome": "ok"
+    }
+  },
+  {
+    "id": "orders-007",
+    "category": "orders",
+    "description": "User requests order preparation on setup C but leaves draft unconfirmed.",
+    "setup": {
+      "cash": "5000",
+      "holdings": {},
+      "profile": [
+        "growth",
+        5,
+        10
+      ]
+    },
+    "turns": [
+      {
+        "user": "Prepare orders to buy my target allocation",
+        "script": [
+          {
+            "tool_calls": [
+              {
+                "name": "prepare_orders",
+                "arguments": {
+                  "mode": "cash_flow"
+                }
+              }
+            ]
+          },
+          {
+            "text": "Draft ready with 3 orders: buy 14 units of DIBF, 26 units of NGEF, and 1 units of SGLD leaving cash after 147.00. Review and confirm in the app."
+          }
+        ]
+      }
+    ],
+    "expect": {
+      "orders_confirmed": 0,
+      "orders_executed": 0,
+      "drafts": 1,
+      "drafts_open": 1,
+      "tools_called": [
+        "prepare_orders"
+      ],
+      "intent": "orders",
+      "outcome": "ok"
+    }
+  }
+]
