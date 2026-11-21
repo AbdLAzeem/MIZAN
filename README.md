@@ -103,7 +103,7 @@ flowchart LR
     API --> AG[Agent: LangGraph]
     AG -->|tool calls| T[Tools layer]
     T --> ENG[Deterministic engine]
-    T --> KB[(Knowledge base: pgvector)]
+    T --> KB[(Knowledge base: keyword search)]
     ENG --> DB[(PostgreSQL)]
     CONF --> ENG
     ENG -->|outbox event| Q[(Outbox table)]
