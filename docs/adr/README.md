@@ -11,3 +11,4 @@ Number them in order and do not rewrite history. Supersede an ADR with a new one
 | [0004](0004-postgresql-outbox-and-idempotency.md) | PostgreSQL as source of truth, with outbox and idempotency |
 | [0005](0005-dev-environment-and-testing-without-real-llms.md) | Development environment and testing without real LLMs |
 | [0006](0006-allocation-rules-and-order-planning.md) | Allocation rules and order planning |
+| [0007](0007-confirmation-outbox-worker-protocol.md) | Confirmation, outbox, and worker protocol |
